@@ -29,10 +29,9 @@ export const Network: React.FC<NetworkProps> = ({
   upline,
   hasSetUpline,
   onSetUpline,
-  getDownlines,
   loading,
 }) => {
-  const { savedReferral, getReferral, clearReferral } = useReferral();
+  const { savedReferral, clearReferral } = useReferral();
   const [uplineAddress, setUplineAddress] = useState('');
   const [networkData, setNetworkData] = useState<NetworkMember[]>([]);
   const [referralLink, setReferralLink] = useState('');

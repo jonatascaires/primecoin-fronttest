@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Contract } from 'ethers';
 import { PRIMECOIN_CONTRACT_ADDRESS, USDT_ADDRESS } from '../config/constants';
 import { PRIMECOIN_ABI, USDT_ABI } from '../config/abi';
 import { getContract, getContractReadOnly, formatToken, parseToken } from '../utils/web3';
@@ -150,7 +149,7 @@ export const useContract = (account: string | null) => {
   };
 
   // Função para comprar tokens com USDT
-  const buyTokens = async (usdtAmount: string, slippage: number = 1) => {
+  const buyTokens = async (usdtAmount: string) => {
     if (!account) {
       toast.error('Conecte sua carteira primeiro');
       return;
@@ -190,7 +189,7 @@ export const useContract = (account: string | null) => {
   };
 
   // Função para vender tokens por USDT
-  const sellTokens = async (tokenAmount: string, slippage: number = 1) => {
+  const sellTokens = async (tokenAmount: string) => {
     if (!account) {
       toast.error('Conecte sua carteira primeiro');
       return;
