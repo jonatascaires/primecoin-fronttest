@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { formatToken } from '../utils/web3';
-import { FaDollarSign, FaExchangeAlt, FaInfoCircle, FaUsers, FaShieldAlt, FaChartLine } from 'react-icons/fa';
+import { FaDollarSign, FaExchangeAlt, FaInfoCircle, FaUsers, FaShieldAlt, FaChartLine, FaClock } from 'react-icons/fa';
 import { SellLimitInfo, UserData } from '../types/contract';
 
 interface TradingProps {
@@ -26,6 +26,8 @@ export const Trading: React.FC<TradingProps> = ({
   const [sellAmount, setSellAmount] = useState('');
   const [activeTab, setActiveTab] = useState<'buy' | 'sell'>('buy');
   const [sellLimitInfo, setSellLimitInfo] = useState<SellLimitInfo | null>(null);
+  const [nextSellTime, setNextSellTime] = useState<bigint>(0n);
+  const [countdown, setCountdown] = useState<string>('');
 
   // Carregar informações de limite ao trocar para aba de venda
   useEffect(() => {
@@ -35,9 +37,47 @@ export const Trading: React.FC<TradingProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
+  // Atualizar countdown a cada segundo
+  useEffect(() => {
+    if (nextSellTime === 0n) {
+      setCountdown('');
+      return;
+    }
+
+    const updateCountdown = () => {
+      const now = BigInt(Math.floor(Date.now() / 1000));
+      const remaining = nextSellTime - now;
+
+      if (remaining <= 0n) {
+        setCountdown('Disponível agora!');
+        setNextSellTime(0n);
+        return;
+      }
+
+      const hours = Number(remaining / 3600n);
+      const minutes = Number((remaining % 3600n) / 60n);
+      const seconds = Number(remaining % 60n);
+
+      setCountdown(`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+
+    return () => clearInterval(interval);
+  }, [nextSellTime]);
+
   const loadSellLimitInfo = async () => {
     const info = await getSellLimitInfo();
     setSellLimitInfo(info);
+    
+    // Atualizar o próximo tempo de venda se não puder vender hoje
+    if (info && !info.canSellToday && info.timeUntilNextSell > 0n) {
+      const now = BigInt(Math.floor(Date.now() / 1000));
+      setNextSellTime(now + info.timeUntilNextSell);
+    } else {
+      setNextSellTime(0n);
+    }
   };
 
   const calculateTokensFromUSDT = (usdt: string) => {
@@ -365,13 +405,51 @@ export const Trading: React.FC<TradingProps> = ({
             </p>
           </div>
 
+          {/* Countdown para próxima venda */}
+          {sellLimitInfo && !sellLimitInfo.canSellToday && countdown && (
+            <div className="bg-gradient-to-r from-[#FF4757]/20 to-[#FF3B57]/20 border border-[#FF4757]/50 rounded-xl p-3 sm:p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <FaClock className="text-[#FF4757] text-lg sm:text-xl" />
+                  <div>
+                    <p className="text-xs sm:text-sm text-[#A8B2C1]">Próxima venda disponível em:</p>
+                    <p className="text-xl sm:text-2xl font-bold text-white font-mono">{countdown}</p>
+                  </div>
+                </div>
+              </div>
+              <p className="text-xs text-[#7D8694] mt-2">
+                Você poderá vender novamente após o período de cooldown de 24 horas
+              </p>
+            </div>
+          )}
+
+          {/* Mensagem quando pode vender */}
+          {sellLimitInfo && sellLimitInfo.canSellToday && sellLimitInfo.maxSellAmount > 0n && (
+            <div className="bg-gradient-to-r from-[#00E676]/20 to-[#00B359]/20 border border-[#00E676]/50 rounded-xl p-3 sm:p-4">
+              <div className="flex items-center space-x-2">
+                <div className="bg-[#00E676] rounded-full p-1">
+                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <p className="text-sm sm:text-base text-[#00E676] font-semibold">
+                  Você pode vender agora!
+                </p>
+              </div>
+            </div>
+          )}
+
           <button
             onClick={handleSell}
-            disabled={loading || !sellAmount || parseFloat(sellAmount) <= 0}
+            disabled={loading || !sellAmount || parseFloat(sellAmount) <= 0 || (sellLimitInfo && !sellLimitInfo.canSellToday)}
             className="w-full bg-gradient-to-r from-[#FF4757] to-[#FF3B57] hover:from-[#E63946] hover:to-[#D62839] text-white font-bold py-2 sm:py-3 rounded-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-1.5 sm:space-x-2 shadow-lg text-sm sm:text-base"
           >
             <FaExchangeAlt className="text-sm sm:text-base" />
-            <span>{loading ? 'Processando...' : 'Vender Tokens'}</span>
+            <span>
+              {loading ? 'Processando...' : 
+               sellLimitInfo && !sellLimitInfo.canSellToday ? 'Aguarde o período de cooldown' : 
+               'Vender Tokens'}
+            </span>
           </button>
         </div>
       )}

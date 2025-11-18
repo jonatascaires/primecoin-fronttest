@@ -34,7 +34,7 @@ export const StakesDebug = () => {
             const stake = await contract.userStakes(account, i);
             debugInfo += `\n📊 Stake #${i}:\n`;
             debugInfo += `  Amount: ${stake.amount.toString()}\n`;
-            debugInfo += `  Staking Period: ${stake.stakingPeriod.toString()} min\n`;
+            debugInfo += `  Staking Period: ${Number(stake.stakingPeriod) / (24 * 60 * 60)} dias (${stake.stakingPeriod.toString()} segundos)\n`;
             debugInfo += `  StartTime: ${stake.startTime.toString()}\n`;
             debugInfo += `  EndTime: ${stake.endTime.toString()}\n`;
             debugInfo += `  Claimed: ${stake.claimed}\n`;

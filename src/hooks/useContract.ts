@@ -361,6 +361,8 @@ export const useContract = (account: string | null) => {
         totalSellPercent: tierInfo.total,
         qualifiedReferrals: BigInt(qualifiedReferrals),
         requiredForNextTier,
+        timeUntilNextSell: sellInfo[2],
+        canSellToday: sellInfo[1],
       };
     } catch (error) {
       console.error('Erro ao obter info de limite de venda:', error);

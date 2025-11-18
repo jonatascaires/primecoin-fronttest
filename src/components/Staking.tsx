@@ -92,7 +92,8 @@ export const Staking: React.FC<StakingProps> = ({
             const mockAmount = 1000; // 1000 PSC como exemplo
             const returnAmount = mockAmount * (period.returnRate / 100);
             // Calcular APR: (returnRate / dias) * 365
-            const apr = ((period.returnRate / period.value) * 365).toFixed(0);
+            const days = period.value / (24 * 60 * 60); // converter segundos para dias
+            const apr = ((period.returnRate / days) * 365).toFixed(0);
             
             return (
               <div
@@ -310,7 +311,7 @@ export const Staking: React.FC<StakingProps> = ({
                       <div className="grid grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm">
                         <div>
                           <p className="text-[#7D8694] text-[10px] sm:text-xs">Período</p>
-                          <p className="font-semibold text-white">{Number(stake.stakingPeriod)} min</p>
+                          <p className="font-semibold text-white">{Number(stake.stakingPeriod) / (24 * 60 * 60)} dias</p>
                         </div>
                         <div>
                           <p className="text-[#7D8694] text-[10px] sm:text-xs">Retorno</p>

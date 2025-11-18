@@ -31,6 +31,8 @@ export interface SellLimitInfo {
   totalSellPercent: number;
   qualifiedReferrals: bigint;
   requiredForNextTier: number;
+  timeUntilNextSell: bigint;
+  canSellToday: boolean;
 }
 
 export interface ReferralBoost {
