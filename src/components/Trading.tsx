@@ -441,7 +441,7 @@ export const Trading: React.FC<TradingProps> = ({
 
           <button
             onClick={handleSell}
-            disabled={loading || !sellAmount || parseFloat(sellAmount) <= 0 || (sellLimitInfo && !sellLimitInfo.canSellToday)}
+            disabled={loading || !sellAmount || parseFloat(sellAmount) <= 0 || (sellLimitInfo !== null && !sellLimitInfo.canSellToday)}
             className="w-full bg-gradient-to-r from-[#FF4757] to-[#FF3B57] hover:from-[#E63946] hover:to-[#D62839] text-white font-bold py-2 sm:py-3 rounded-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-1.5 sm:space-x-2 shadow-lg text-sm sm:text-base"
           >
             <FaExchangeAlt className="text-sm sm:text-base" />
